@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Career Roadmap Guide - Created by Prabhjeet Singh</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      background: #fff9c4; /* changed from #f3f5fb to light yellow */
+      color: #222;
+    }
+
+    header {
+      background: #283593;
+      color: #fff;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+
+    .search-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .search-area input,
+    .search-area select {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 0.9rem;
+      min-width: 120px;
+    }
+
+    .search-area input {
+      flex: 1 1 180px;
+    }
+
+    main {
+      padding: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 800px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sidebar {
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+
+    .sidebar h2 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 6px;
+    }
+
+    .career-list {
+      list-style: none;
+      margin-top: 6px;
+    }
+
+    .career-list li {
+      padding: 8px 10px;
+      margin-bottom: 4px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .career-list li span.tag {
+      font-size: 0.7rem;
+      background: #e8eaf6;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
+    .career-list li:hover {
+      background: #e8eaf6;
+      transform: translateY(-1px);
+    }
+
+    .career-list li.active {
+      background: #283593;
+      color: #fff;
+    }
+
+    .content {
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px 18px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      min-height: 320px;
+    }
+
+    .content h2 {
+      font-size: 1.3rem;
+      margin-bottom: 6px;
+    }
+
+    .content .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 0.8rem;
+      background: #e8eaf6;
+      border-radius: 999px;
+      margin-right: 6px;
+    }
+
+    .content-section {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .content-section h3 {
+      font-size: 1rem;
+      margin-bottom: 4px;
+      color: #283593;
+    }
+
+    .content-section ul {
+      margin-left: 16px;
+      list-style: disc;
+    }
+
+    .note-box {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #fffde7;
+      border: 1px solid #ffe082;
+      font-size: 0.8rem;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.75rem;
+      padding: 10px 0 16px;
+      color: #666;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <h1>Career Roadmap Guide (Offline)</h1>
+    <p>Created by Prabhjeet Singh · Offline Career Guidance App</p>
+  </div>
+
+  <div class="search-area">
+    <input type="text" id="searchInput" placeholder="Search career…" />
+    <select id="streamFilter">
+      <option value="all">All Streams</option>
+      <option value="Science">Science</option>
+      <option value="Commerce">Commerce</option>
+      <option value="Arts">Arts</option>
+      <option value="Any">Any</option>
+    </select>
+  </div>
+</header>
+
+<main>
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>Careers</h2>
+      <ul id="careerList" class="career-list">
+        <!-- Filled by JavaScript -->
+      </ul>
+    </aside>
+
+    <section class="content" id="careerDetail">
+      <h2>Welcome 👋</h2>
+      <p style="font-size:0.9rem; margin-top:6px;">
+        Choose a career from the left side list to view full roadmap.
+      </p>
+    </section>
+  </div>
+</main>
+
+<footer>
+  Designed for students & teachers | Works 100% offline | Created by Prabhjeet Singh
+</footer>
+
+<script>
+const careers = [
+{
+id: 1, name: "Doctor", stream: "Science", level: "After 12th (PCB)",
+shortDesc: "Doctors diagnose illnesses, prescribe treatment and help patients stay healthy.",
+eligibility: ["10+2 with PCB", "NEET qualification"],
+courses: ["MBBS", "MD/MS"],
+exams: ["NEET-UG"],
+skills: ["Biology", "Patience", "Decision-making"],
+roadmap: ["Choose PCB", "Clear NEET", "Complete MBBS"]
+},
+
+{
+id: 2, name: "Engineer (Computer/IT)", stream: "Science", level: "After 12th (PCM)",
+shortDesc: "Engineers solve technological problems using mathematics and science.",
+eligibility: ["10+2 PCM"],
+courses: ["B.Tech", "B.E."],
+exams: ["JEE Main", "State CET"],
+skills: ["Programming", "Problem-solving"],
+roadmap: ["Choose PCM", "Crack JEE", "Complete B.Tech"]
+},
+
+{
+id: 3, name: "Teacher", stream: "Any", level: "Graduation + B.Ed.",
+shortDesc: "Teachers guide and educate students.",
+eligibility: ["Graduation", "B.Ed"],
+courses: ["B.Ed", "D.El.Ed"],
+exams: ["CTET", "TET"],
+skills: ["Communication", "Patience"],
+roadmap: ["Graduate", "Complete B.Ed", "Clear TET"]
+},
+
+{
+id: 4, name: "Police / Defence Officer", stream: "Any", level: "12th/Graduation",
+shortDesc: "Maintains law & order and ensures safety.",
+eligibility: ["12th/Graduation"],
+courses: ["Police training"],
+exams: ["NDA", "CDS", "Police SI/Constable Exams"],
+skills: ["Fitness", "Discipline"],
+roadmap: ["Prepare physically", "Clear exam", "Join academy"]
+},
+
+{
+id: 5, name: "Fashion Designer", stream: "Any", level: "10th/12th",
+shortDesc: "Designs clothes and accessories.",
+eligibility: ["10th/12th"],
+courses: ["Fashion Designing"],
+exams: ["NIFT"],
+skills: ["Creativity"],
+roadmap: ["Do designing course", "Create portfolio"]
+},
+
+{
+id: 6, name: "AI Engineer / Data Scientist", stream: "Science", level: "12th PCM",
+shortDesc: "Builds AI systems and analyses large datasets.",
+eligibility: ["12th PCM"],
+courses: ["B.Tech CS/AI", "Data Science"],
+exams: ["JEE", "University Exams"],
+skills: ["Python", "ML"],
+roadmap: ["Learn coding", "Do B.Tech", "Build projects"]
+},
+
+{
+id: 7, name:"Pilot (Commercial)", stream:"Science", level:"After 12th (PCM)", 
+shortDesc:"Pilots fly aircraft and ensure passenger safety.",
+eligibility:["12th PCM with 50%", "Medical fitness"],
+courses:["Commercial Pilot License (CPL)", "Aviation training"],
+exams:["DGCA exams"],
+skills:["Focus", "Technical knowledge"],
+roadmap:["Choose PCM", "Join flying school", "Complete CPL"]
+},
+
+{
+id: 8, name:"IAS Officer", stream:"Any", level:"Graduation",
+shortDesc:"Top administrative post in India through UPSC.",
+eligibility:["Graduation"],
+courses:["General Studies"],
+exams:["UPSC CSE"],
+skills:["Leadership"],
+roadmap:["Graduate", "Prepare for UPSC", "Clear CSE"]
+},
+
+{
+id: 9, name:"PPSC PCS Officer", stream:"Any", level:"Graduation",
+shortDesc:"Administrative officer in Punjab Government.",
+eligibility:["Graduation"],
+courses:["Punjab GK"],
+exams:["PPSC PCS"],
+skills:["Law", "Administration"],
+roadmap:["Graduate", "Crack PCS"]
+},
+
+{
+id: 10, name:"SDM (Sub Divisional Magistrate)", stream:"Any", level:"UPSC/PPSC",
+shortDesc:"Administrative head of a sub-division.",
+eligibility:["UPSC/PPSC Rank"],
+courses:["Law & Admin"],
+exams:["UPSC/PPSC"],
+skills:["Leadership"],
+roadmap:["Crack UPSC/PPSC"]
+},
+
+{
+id: 11, name:"Deputy Commissioner (DC)", stream:"Any", level:"IAS",
+shortDesc:"District head responsible for administration.",
+eligibility:["IAS officer"],
+courses:["Administration"],
+exams:["UPSC"],
+skills:["Leadership"],
+roadmap:["Become IAS", "Gain seniority"]
+},
+
+{
+id: 12, name:"Tehsildar (Punjab)", stream:"Any", level:"Graduation",
+shortDesc:"Manages land and revenue records.",
+eligibility:["Graduate"],
+courses:["Revenue laws"],
+exams:["PPSC Tehsildar"],
+skills:["Record management"],
+roadmap:["Graduate", "Clear exam"]
+},
+
+{
+id: 13, name:"Naib Tehsildar", stream:"Any", level:"Graduation",
+shortDesc:"Assists Tehsildar in revenue tasks.",
+eligibility:["Graduate"],
+courses:["Punjab GK"],
+exams:["PPSC NT"],
+skills:["Administration"],
+roadmap:["Graduate", "Crack exam"]
+},
+
+{
+id: 14, name:"Patwari (Punjab)", stream:"Any", level:"12th",
+shortDesc:"Maintains village land records.",
+eligibility:["12th", "Typing"],
+courses:["Land revenue"],
+exams:["Punjab Patwari"],
+skills:["Typing", "Record keeping"],
+roadmap:["Prepare", "Clear exam"]
+},
+
+{
+id: 15, name:"Irrigation Dept JE", stream:"Science", level:"Diploma/B.Tech",
+shortDesc:"Junior Engineer for irrigation projects.",
+eligibility:["Diploma/B.Tech"],
+courses:["Civil Engg"],
+exams:["PPSC JE"],
+skills:["Technical"],
+roadmap:["Complete diploma", "Clear JE exam"]
+},
+
+{
+id: 16, name:"IPS Officer", stream:"Any", level:"Graduation",
+shortDesc:"High-rank police officer.",
+eligibility:["Graduation"],
+courses:["UPSC"],
+exams:["UPSC CSE"],
+skills:["Fitness", "Decision making"],
+roadmap:["Graduate", "Crack UPSC"]
+},
+
+{
+id: 17, name:"Punjab Police Constable", stream:"Any", level:"12th",
+shortDesc:"Entry-level police position.",
+eligibility:["12th"],
+exams:["Punjab Constable Exam"],
+skills:["Fitness"],
+roadmap:["Apply", "Clear tests"]
+},
+
+{
+id: 18, name:"Punjab Police SI", stream:"Any", level:"Graduation",
+shortDesc:"Supervisory police role.",
+eligibility:["Graduate"],
+exams:["Punjab SI Exam"],
+skills:["Investigation"],
+roadmap:["Prepare", "Clear exam"]
+},
+
+{
+id: 19, name:"RAW Intelligence Officer", stream:"Any", level:"UPSC",
+shortDesc:"Intelligence officer for external security.",
+eligibility:["UPSC cleared IAS/IPS"],
+courses:["Security"],
+exams:["UPSC"],
+skills:["Secrecy"],
+roadmap:["Join IAS/IPS", "Get deputation"]
+},
+
+{
+id: 20, name:"IB Intelligence Officer", stream:"Any", level:"Graduation",
+shortDesc:"Internal intelligence operations.",
+eligibility:["Graduate"],
+exams:["IB ACIO"],
+skills:["Observation"],
+roadmap:["Crack ACIO exam"]
+},
+
+{
+id: 21, name:"CBI Officer", stream:"Any", level:"Graduation",
+shortDesc:"Investigates major crimes.",
+eligibility:["Graduate"],
+exams:["SSC CGL"],
+skills:["Investigation"],
+roadmap:["Clear SSC CGL"]
+},
+
+{
+id: 22, name:"Income Tax Inspector", stream:"Any", level:"Graduation",
+shortDesc:"Handles income tax assessment.",
+eligibility:["Graduate"],
+exams:["SSC CGL"],
+skills:["Accounting"],
+roadmap:["Crack SSC"]
+},
+
+{
+id: 23, name:"Bank PO", stream:"Any", level:"Graduation",
+shortDesc:"Probationary officer in banks.",
+eligibility:["Graduate"],
+exams:["IBPS PO", "SBI PO"],
+skills:["Management"],
+roadmap:["Prepare", "Crack exam"]
+},
+
+{
+id: 24, name:"Bank Clerk", stream:"Any", level:"Graduation",
+shortDesc:"Clerical banking role.",
+eligibility:["Graduate"],
+exams:["IBPS Clerk"],
+skills:["Typing"],
+roadmap:["Clear exam"]
+},
+
+{
+id: 25, name:"Army Officer", stream:"Any", level:"12th/Graduation",
+shortDesc:"Officer rank in Indian Army.",
+eligibility:["12th (NDA)", "Graduation (CDS)"],
+exams:["NDA", "CDS"],
+skills:["Fitness"],
+roadmap:["Clear NDA/CDS"]
+},
+
+{
+id: 26, name:"Navy Officer", stream:"Any", level:"12th/Graduation",
+shortDesc:"Officer in Indian Navy.",
+eligibility:["12th PCM"],
+exams:["NDA", "CDS"],
+skills:["Discipline"],
+roadmap:["Training after NDA/CDS"]
+},
+
+{
+id: 27, name:"Air Force Officer", stream:"Science", level:"12th PCM",
+shortDesc:"Officer in Indian Air Force.",
+eligibility:["12th PCM"],
+exams:["NDA", "AFCAT"],
+skills:["Discipline"],
+roadmap:["Clear exam"]
+},
+
+{
+id: 28, name:"Forest Range Officer", stream:"Science", level:"Graduation",
+shortDesc:"Protects forests and wildlife.",
+eligibility:["B.Sc/B.Tech"],
+exams:["UPSC Forest Service"],
+skills:["Wildlife knowledge"],
+roadmap:["Graduate", "Clear exam"]
+},
+
+{
+id: 29, name:"Agriculture Officer", stream:"Science", level:"BSc Agri",
+shortDesc:"Promotes agricultural development.",
+eligibility:["BSc Agriculture"],
+exams:["PSC AO"],
+skills:["Agri knowledge"],
+roadmap:["Complete degree"]
+},
+
+{
+id: 30, name:"Food Safety Officer", stream:"Science", level:"BSc Food Tech",
+shortDesc:"Ensures food quality.",
+eligibility:["BSc Chemistry/Food Tech"],
+exams:["PSC FSO"],
+skills:["Lab testing"],
+roadmap:["Graduate", "Clear exam"]
+},
+
+{
+id: 31, name:"Junior Engineer (Civil)", stream:"Science", level:"Diploma/B.Tech",
+shortDesc:"Executes construction projects.",
+eligibility:["Diploma/B.Tech"],
+exams:["SSC JE"],
+skills:["Civil Engg"],
+roadmap:["Prepare", "Clear exam"]
+},
+
+{
+id: 32, name:"Govt Clerk", stream:"Any", level:"Graduation",
+shortDesc:"Office administration in govt.",
+eligibility:["Graduate", "Typing"],
+exams:["State Clerk Exam"],
+skills:["Typing"],
+roadmap:["Clear exam"]
+},
+
+{
+id: 33, name:"Lab Technician", stream:"Science", level:"MLT Diploma",
+shortDesc:"Works in medical labs.",
+eligibility:["DMLT"],
+skills:["Testing"],
+roadmap:["Complete diploma"]
+},
+
+{
+id: 34, name:"Nurse", stream:"Science", level:"12th PCB",
+shortDesc:"Provides patient care.",
+eligibility:["12th PCB"],
+courses:["GNM", "BSc Nursing"],
+skills:["Compassion"],
+roadmap:["Complete Nursing"]
+},
+
+{
+id: 35, name:"Pharmacist", stream:"Science", level:"12th PCB/PCM",
+shortDesc:"Dispenses medicines.",
+eligibility:["12th"],
+courses:["D.Pharm", "B.Pharm"],
+skills:["Drug knowledge"],
+roadmap:["Finish pharmacy"]
+},
+
+{
+id: 36, name:"Lawyer", stream:"Any", level:"LLB",
+shortDesc:"Legal professional.",
+eligibility:["LLB"],
+skills:["Argumentation"],
+roadmap:["Finish LLB"]
+},
+
+{
+id: 37, name:"Judge", stream:"Law", level:"LLB",
+shortDesc:"Judicial authority.",
+eligibility:["LLB"],
+exams:["Judicial Exam"],
+skills:["Law"],
+roadmap:["LLB", "Clear exam"]
+},
+
+{
+id: 38, name:"CA (Chartered Accountant)", stream:"Commerce", level:"12th",
+shortDesc:"Handles finance & audit.",
+eligibility:["12th"],
+exams:["CA Foundation"],
+skills:["Accounting"],
+roadmap:["Clear CA levels"]
+},
+
+{
+id: 39, name:"CS (Company Secretary)", stream:"Commerce", level:"12th",
+shortDesc:"Corporate Compliance Officer.",
+eligibility:["12th"],
+exams:["CSEET"],
+skills:["Corporate law"],
+roadmap:["Complete CS"]
+},
+
+{
+id: 40, name:"MBA Manager", stream:"Any", level:"Graduation",
+shortDesc:"Manages business operations.",
+eligibility:["Graduate"],
+exams:["CAT", "MAT"],
+skills:["Leadership"],
+roadmap:["Do MBA"]
+},
+
+{
+id: 41, name:"Accountant", stream:"Commerce", level:"12th/Graduation",
+shortDesc:"Manages accounts.",
+eligibility:["12th commerce"],
+skills:["Tally"],
+roadmap:["Learn accounting"]
+},
+
+{
+id: 42, name:"ITI Electrician", stream:"Any", level:"10th",
+shortDesc:"Electrical technician.",
+eligibility:["10th"],
+courses:["ITI Electrician"],
+skills:["Wiring"],
+roadmap:["Do ITI"]
+},
+
+{
+id: 43, name:"Plumber", stream:"Any", level:"10th",
+shortDesc:"Handles plumbing systems.",
+eligibility:["10th"],
+skills:["Tools handling"],
+roadmap:["Learn trade"]
+},
+
+{
+id: 44, name:"Carpenter", stream:"Any", level:"10th",
+shortDesc:"Woodwork expert.",
+eligibility:["10th"],
+skills:["Craft"],
+roadmap:["ITI Carpenter"]
+},
+
+{
+id: 45, name:"Automobile Technician", stream:"Any", level:"10th/ITI",
+shortDesc:"Repairs vehicles.",
+eligibility:["10th"],
+courses:["ITI Motor Mechanic"],
+skills:["Repair"],
+roadmap:["Learn mechanic trade"]
+},
+
+{
+id: 46, name:"Chef", stream:"Any", level:"10th/12th",
+shortDesc:"Professional cook.",
+eligibility:["10th/12th"],
+courses:["Hotel management"],
+skills:["Cooking"],
+roadmap:["Do HM course"]
+},
+
+{
+id: 47, name:"Hotel Manager", stream:"Any", level:"12th",
+shortDesc:"Runs hotel operations.",
+eligibility:["12th"],
+courses:["BHMCT"],
+skills:["Communication"],
+roadmap:["Complete HM"]
+},
+
+{
+id: 48, name:"Graphic Designer", stream:"Any", level:"10th/12th",
+shortDesc:"Creates graphics.",
+eligibility:["Basic skills"],
+skills:["Creativity"],
+roadmap:["Learn design tools"]
+},
+
+{
+id: 49, name:"Web Developer", stream:"Science", level:"10th/12th",
+shortDesc:"Builds websites.",
+eligibility:["Basic coding"],
+skills:["HTML/CSS/JS"],
+roadmap:["Learn coding", "Projects"]
+},
+
+{
+id: 50, name:"Android App Developer", stream:"Science", level:"12th",
+shortDesc:"Builds mobile apps.",
+eligibility:["Basic coding"],
+skills:["Java/Kotlin"],
+roadmap:["Learn app development"]
+},
+{
+id: 51, name:"Electricity Board Lineman", stream:"Any", level:"ITI",
+shortDesc:"Maintains and repairs electricity lines.",
+eligibility:["ITI Electrician"],
+exams:["PSPCL Lineman Exam"],
+skills:["Electrical safety"],
+roadmap:["Complete ITI","Clear PSPCL exam"]
+},
+
+{
+id: 52, name:"IT Project Manager", stream:"Science", level:"Graduation",
+shortDesc:"Manages IT teams and projects.",
+eligibility:["B.Tech/MCA"],
+skills:["Management","Planning"],
+roadmap:["Gain experience","Promotion"]
+},
+
+{
+id: 53, name:"IRS Officer (Income Tax)", stream:"Any", level:"Graduation",
+shortDesc:"Handles income tax administration.",
+eligibility:["Graduation"],
+exams:["UPSC CSE"],
+skills:["Finance","Law"],
+roadmap:["Clear UPSC","Join IRS"]
+},
+
+{
+id: 54, name:"PCS-J (Judicial Magistrate)", stream:"Law", level:"LLB",
+shortDesc:"Judicial officer appointed by state.",
+eligibility:["LLB"],
+exams:["Judicial Service Exam"],
+skills:["Law","Decision making"],
+roadmap:["LLB","Clear PCS-J"]
+},
+
+{
+id: 55, name:"Professor (Assistant Professor)", stream:"Any", level:"Post Graduation",
+shortDesc:"Teaches at colleges/universities.",
+eligibility:["Post Graduation","NET"],
+exams:["UGC NET"],
+skills:["Teaching"],
+roadmap:["Do PG","Clear NET"]
+},
+
+{
+id: 56, name:"School Principal", stream:"Any", level:"PG + B.Ed",
+shortDesc:"Heads school administration.",
+eligibility:["PG","Teaching experience"],
+skills:["Leadership"],
+roadmap:["Become senior teacher","Promotion"]
+},
+
+{
+id: 57, name:"Veterinary Doctor", stream:"Science", level:"12th PCB",
+shortDesc:"Animal doctor treating livestock & pets.",
+eligibility:["12th PCB"],
+courses:["BVSc"],
+skills:["Animal care"],
+roadmap:["Complete BVSc"]
+},
+
+{
+id: 58, name:"Physiotherapist", stream:"Science", level:"12th PCB",
+shortDesc:"Rehabilitation & therapy expert.",
+eligibility:["12th PCB"],
+courses:["BPT"],
+skills:["Anatomy"],
+roadmap:["Complete BPT"]
+},
+
+{
+id: 59, name:"Sports Coach", stream:"Any", level:"Diploma/Certification",
+shortDesc:"Trains athletes in sports.",
+eligibility:["Sports certificate"],
+skills:["Training"],
+roadmap:["Sports diploma"]
+},
+
+{
+id: 60, name:"Fitness Trainer", stream:"Any", level:"10th",
+shortDesc:"Gym & fitness expert.",
+eligibility:["Fitness certification"],
+skills:["Strength training"],
+roadmap:["Certification"]
+},
+
+{
+id: 61, name:"Yoga Instructor", stream:"Any", level:"10th",
+shortDesc:"Teaches yoga exercises.",
+eligibility:["Yoga diploma"],
+skills:["Flexibility"],
+roadmap:["Complete yoga training"]
+},
+
+{
+id: 62, name:"Architect", stream:"Science", level:"12th PCM",
+shortDesc:"Designs buildings & structures.",
+eligibility:["12th PCM"],
+courses:["B.Arch"],
+exams:["NATA"],
+skills:["Drawing"],
+roadmap:["Do B.Arch"]
+},
+
+{
+id: 63, name:"Interior Designer", stream:"Any", level:"12th",
+shortDesc:"Designs interior spaces.",
+eligibility:["12th"],
+courses:["Design diploma"],
+skills:["Creativity"],
+roadmap:["Interior Design Course"]
+},
+
+{
+id: 64, name:"Librarian", stream:"Any", level:"BLIS/MLIS",
+shortDesc:"Manages library and books.",
+eligibility:["BLIS"],
+skills:["Organization"],
+roadmap:["Do BLIS/MLIS"]
+},
+
+{
+id: 65, name:"Social Worker", stream:"Arts", level:"BA Social Work",
+shortDesc:"Works for welfare of society.",
+eligibility:["12th"],
+courses:["BSW","MSW"],
+skills:["Empathy"],
+roadmap:["Do BSW","Work with NGOs"]
+},
+
+{
+id: 66, name:"Content Writer", stream:"Any", level:"12th",
+shortDesc:"Writes articles & content.",
+eligibility:["Language skills"],
+skills:["Writing"],
+roadmap:["Practice writing","Create portfolio"]
+},
+
+{
+id: 67, name:"Journalist", stream:"Arts", level:"BA Journalism",
+shortDesc:"Collects and reports news.",
+eligibility:["12th"],
+courses:["BJMC"],
+skills:["Communication"],
+roadmap:["Do Journalism degree"]
+},
+
+{
+id: 68, name:"Photographer", stream:"Any", level:"10th/12th",
+shortDesc:"Takes professional photos.",
+eligibility:["Camera skills"],
+skills:["Creativity"],
+roadmap:["Photography course"]
+},
+
+{
+id: 69, name:"Videographer", stream:"Any", level:"10th/12th",
+shortDesc:"Shoots and edits videos.",
+eligibility:["Editing skills"],
+skills:["Camera operation"],
+roadmap:["Video editing training"]
+},
+
+{
+id: 70, name:"Animator", stream:"Any", level:"12th",
+shortDesc:"Creates animations for media.",
+eligibility:["12th"],
+courses:["Animation diploma"],
+skills:["Creativity"],
+roadmap:["Learn animation tools"]
+},
+
+{
+id: 71, name:"Cyber Security Expert", stream:"Science", level:"12th",
+shortDesc:"Protects systems from cyber threats.",
+eligibility:["Coding basics"],
+courses:["Cyber security diploma"],
+skills:["Network security"],
+roadmap:["Do cyber course"]
+},
+
+{
+id: 72, name:"Ethical Hacker", stream:"Science", level:"12th",
+shortDesc:"Tests security systems legally.",
+eligibility:["Coding"],
+courses:["CEH Certification"],
+skills:["Hacking tools"],
+roadmap:["Ethical hacking course"]
+},
+
+{
+id: 73, name:"Data Analyst", stream:"Science", level:"Graduation",
+shortDesc:"Analyses data for companies.",
+eligibility:["Graduation"],
+skills:["Excel","Python"],
+roadmap:["Learn data tools"]
+},
+
+{
+id: 74, name:"Machine Learning Engineer", stream:"Science", level:"Graduation",
+shortDesc:"Builds ML models.",
+eligibility:["B.Tech/BCA"],
+skills:["Python","ML"],
+roadmap:["Projects + internship"]
+},
+
+{
+id: 75, name:"Cloud Engineer", stream:"Science", level:"Graduation",
+shortDesc:"Handles cloud servers.",
+eligibility:["B.Tech"],
+skills:["AWS/Azure"],
+roadmap:["Cloud certifications"]
+},
+
+{
+id: 76, name:"Network Engineer", stream:"Science", level:"Diploma/B.Tech",
+shortDesc:"Manages network systems.",
+eligibility:["Diploma/B.Tech"],
+skills:["Networking"],
+roadmap:["CCNA certification"]
+},
+
+{
+id: 77, name:"Software Tester", stream:"Science", level:"12th/Graduation",
+shortDesc:"Tests software for bugs.",
+eligibility:["Basic IT knowledge"],
+skills:["Testing"],
+roadmap:["Testing certification"]
+},
+
+{
+id: 78, name:"Railway Station Master", stream:"Any", level:"Graduation",
+shortDesc:"Manages railway station operations.",
+eligibility:["Graduate"],
+exams:["RRB NTPC"],
+skills:["Coordination"],
+roadmap:["Clear RRB exam"]
+},
+
+{
+id: 79, name:"Railway Ticket Collector (TC)", stream:"Any", level:"12th",
+shortDesc:"Checks tickets in trains.",
+eligibility:["12th"],
+exams:["RRB Exam"],
+skills:["Communication"],
+roadmap:["Clear RRB exam"]
+},
+
+{
+id: 80, name:"Locomotive Pilot (Railway Driver)", stream:"Any", level:"ITI",
+shortDesc:"Drives trains.",
+eligibility:["ITI"],
+exams:["RRB ALP"],
+skills:["Alertness"],
+roadmap:["Clear ALP exam"]
+},
+
+{
+id: 81, name:"Post Office Inspector", stream:"Any", level:"Graduation",
+shortDesc:"Supervises postal operations.",
+eligibility:["Graduate"],
+exams:["SSC CGL"],
+skills:["Admin"],
+roadmap:["Clear SSC CGL"]
+},
+
+{
+id: 82, name:"Postman", stream:"Any", level:"10th",
+shortDesc:"Delivers mail.",
+eligibility:["10th"],
+exams:["Postal Dept Exam"],
+skills:["Local navigation"],
+roadmap:["Clear exam"]
+},
+
+{
+id: 83, name:"Anganwadi Worker", stream:"Any", level:"10th",
+shortDesc:"Works in child care centres.",
+eligibility:["10th"],
+skills:["Child care"],
+roadmap:["Training"]
+},
+
+{
+id: 84, name:"Air Hostess / Flight Steward", stream:"Any", level:"12th",
+shortDesc:"Cabin crew ensuring passenger safety.",
+eligibility:["12th"],
+skills:["Communication"],
+roadmap:["Cabin crew training"]
+},
+
+{
+id: 85, name:"Travel & Tourism Officer", stream:"Any", level:"12th",
+shortDesc:"Works in tourism sector.",
+eligibility:["12th"],
+courses:["Tourism diploma"],
+skills:["Customer service"],
+roadmap:["Do tourism course"]
+},
+
+{
+id: 86, name:"Event Manager", stream:"Any", level:"12th",
+shortDesc:"Organises events & functions.",
+eligibility:["12th"],
+skills:["Planning"],
+roadmap:["Event mgmt course"]
+},
+
+{
+id: 87, name:"Real Estate Agent", stream:"Any", level:"12th",
+shortDesc:"Buys and sells property.",
+eligibility:["12th"],
+skills:["Marketing"],
+roadmap:["Learn real estate rules"]
+},
+
+{
+id: 88, name:"Entrepreneur (Business Owner)", stream:"Any", level:"Any",
+shortDesc:"Starts and runs business.",
+eligibility:["Any"],
+skills:["Risk-taking"],
+roadmap:["Create business plan"]
+},
+
+{
+id: 89, name:"Police Dog Handler (K9 Unit)", stream:"Any", level:"12th",
+shortDesc:"Trains and works with police dogs.",
+eligibility:["12th"],
+skills:["Animal training"],
+roadmap:["Police recruitment"]
+},
+
+{
+id: 90, name:"Forensic Scientist", stream:"Science", level:"BSc Forensics",
+shortDesc:"Solves crimes using science.",
+eligibility:["BSc"],
+skills:["Lab analysis"],
+roadmap:["Forensic degree"]
+},
+
+{
+id: 91, name:"Meteorologist", stream:"Science", level:"BSc/MSc",
+shortDesc:"Studies weather & climate.",
+eligibility:["BSc"],
+skills:["Data analysis"],
+roadmap:["Do MSc Meteorology"]
+},
+
+{
+id: 92, name:"Space Scientist (ISRO)", stream:"Science", level:"B.Tech",
+shortDesc:"Works on space research.",
+eligibility:["B.Tech"],
+exams:["ISRO Scientist Exam"],
+skills:["Physics"],
+roadmap:["Engineering + ISRO test"]
+},
+
+{
+id: 93, name:"Climatologist", stream:"Science", level:"BSc/MSc",
+shortDesc:"Studies long-term weather changes.",
+eligibility:["BSc"],
+skills:["Research"],
+roadmap:["PG in Climate Science"]
+},
+
+{
+id: 94, name:"Marine Biologist", stream:"Science", level:"BSc",
+shortDesc:"Studies ocean life.",
+eligibility:["BSc"],
+skills:["Research"],
+roadmap:["Marine science course"]
+},
+
+{
+id: 95, name:"Geologist", stream:"Science", level:"BSc Geology",
+shortDesc:"Studies earth & minerals.",
+eligibility:["BSc"],
+skills:["Fieldwork"],
+roadmap:["Do MSc Geology"]
+},
+
+{
+id: 96, name:"Electric Vehicle Technician", stream:"Science", level:"ITI/Diploma",
+shortDesc:"Repairs EVs.",
+eligibility:["ITI"],
+skills:["Electrical"],
+roadmap:["EV course"]
+},
+
+{
+id: 97, name:"Drone Operator", stream:"Any", level:"10th/12th",
+shortDesc:"Operates drones for various tasks.",
+eligibility:["Drone training"],
+skills:["Navigation"],
+roadmap:["Drone pilot license"]
+},
+
+{
+id: 98, name:"SEO Specialist", stream:"Any", level:"12th",
+shortDesc:"Optimises websites for search engines.",
+eligibility:["Basic computer"],
+skills:["SEO"],
+roadmap:["SEO course"]
+},
+
+{
+id: 99, name:"Digital Marketer", stream:"Any", level:"12th",
+shortDesc:"Promotes brands online.",
+eligibility:["12th"],
+skills:["Social media"],
+roadmap:["Digital marketing course"]
+},
+
+{
+id: 100, name:"YouTuber", stream:"Any", level:"Any",
+shortDesc:"Creates videos online.",
+eligibility:["Any"],
+skills:["Creativity"],
+roadmap:["Create channel","Upload videos"]
+},
+
+{
+id: 101, name:"Stock Market Trader", stream:"Any", level:"12th",
+shortDesc:"Trades shares & stocks.",
+eligibility:["12th"],
+skills:["Market knowledge"],
+roadmap:["Trading course"]
+},
+
+{
+id: 102, name:"Insurance Advisor", stream:"Any", level:"12th",
+shortDesc:"Sells insurance policies.",
+eligibility:["12th"],
+skills:["Communication"],
+roadmap:["IRDA exam"]
+},
+
+{
+id: 103, name:"Bank Manager", stream:"Any", level:"Graduation + Experience",
+shortDesc:"Heads a bank branch.",
+eligibility:["Graduate"],
+skills:["Leadership"],
+roadmap:["Bank PO → Manager"]
+},
+
+{
+id: 104, name:"Quality Control Officer", stream:"Science", level:"BSc",
+shortDesc:"Ensures product quality.",
+eligibility:["BSc"],
+skills:["Testing"],
+roadmap:["QC training"]
+}
+];  // END OF CAREERS ARRAY
+
+
+
+
+// ================= RENDER FUNCTIONS =================
+
+const careerListEl = document.getElementById("careerList");
+const careerDetailEl = document.getElementById("careerDetail");
+const searchInput = document.getElementById("searchInput");
+const streamFilter = document.getElementById("streamFilter");
+
+function renderCareerList() {
+  const text = searchInput.value.toLowerCase();
+  const stream = streamFilter.value;
+
+  careerListEl.innerHTML = "";
+
+  careers
+    .filter(c => 
+      (stream === "all" || c.stream === stream) &&
+      (c.name.toLowerCase().includes(text) || c.stream.toLowerCase().includes(text))
+    )
+    .forEach(c => {
+      const li = document.createElement("li");
+      li.innerHTML = `${c.name} <span class="tag">${c.stream}</span>`;
+      li.onclick = () => showCareerDetail(c);
+      careerListEl.appendChild(li);
+    });
+}
+
+function showCareerDetail(c) {
+  careerDetailEl.innerHTML = `
+    <h2>${c.name}</h2>
+    <p style="margin:8px 0;">${c.shortDesc}</p>
+
+    <h3>Eligibility</h3>
+    <ul>${c.eligibility.map(i => `<li>${i}</li>`).join("")}</ul>
+
+    <h3 style="margin-top:10px;">Courses</h3>
+    <ul>${c.courses?.map(i => `<li>${i}</li>`).join("") || ""}</ul>
+
+    <h3 style="margin-top:10px;">Exams</h3>
+    <ul>${c.exams?.map(i => `<li>${i}</li>`).join("") || ""}</ul>
+
+    <h3 style="margin-top:10px;">Skills</h3>
+    <ul>${c.skills.map(i => `<li>${i}</li>`).join("")}</ul>
+
+    <h3 style="margin-top:10px;">Roadmap</h3>
+    <ul>${c.roadmap.map(i => `<li>${i}</li>`).join("")}</ul>
+  `;
+}
+
+searchInput.oninput = renderCareerList;
+streamFilter.onchange = renderCareerList;
+
+renderCareerList();
+
+</script>
+
+</body>
+</html>
