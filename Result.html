@@ -1,0 +1,591 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Result Manager</title>
+
+<!-- PDF libs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+  body{font-family:Arial,background:#f4f8ff;margin:0;padding:18px;}
+  .wrap{max-width:1100px;margin:auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 8px 30px #0002;}
+  h1{margin:0 0 12px;color:#023059;text-align:center;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+  .col{flex:1;min-width:220px;}
+  label{display:block;font-weight:700;margin-bottom:6px;}
+  input[type=text], input[type=number], input[type=date], select{width:100%;padding:8px;border-radius:6px;border:1px solid #ccc;}
+  button{padding:9px 12px;border-radius:8px;border:none;background:#004aad;color:#fff;font-weight:700;cursor:pointer;}
+  button.secondary{background:#0b76ff;}
+  button.danger{background:#c90000;}
+  .controls{display:flex;gap:8px;align-items:center;}
+  .subjects{margin-top:12px;}
+  .subject-card{background:#f7fbff;border:1px solid #dbeeff;padding:12px;border-radius:10px;margin-bottom:12px;}
+  .subject-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .exam-row{display:flex;gap:8px;align-items:center;margin:6px 0;}
+  .exam-row label{width:160px;min-width:120px;margin:0;font-weight:600;}
+  .exam-row .small{width:110px;padding:6px;border-radius:6px;border:1px solid #ccc;}
+  .summary{background:#eef5ff;padding:10px;border-radius:8px;margin-top:12px;font-weight:700;}
+  .flex-between{display:flex;justify-content:space-between;align-items:center;}
+  .flex-end{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;}
+  .d-none{display:none;}
+  /* Print/PDF report styling */
+  #printArea .report-card{width:1000px;padding:18px;border:1px solid #d6e8ff;background:#fff;margin:auto;}
+  #printArea .school-title{font-size:28px;font-weight:800;text-align:center;margin-bottom:8px;}
+  #reportTable{width:100%;border-collapse:collapse;margin-top:12px;}
+  #reportTable th,#reportTable td{border:1px solid #dbeeff;padding:8px;text-align:center;font-size:13px;}
+  #reportTable th{background:#f0f6ff;font-weight:800;}
+  .signatures{display:flex;justify-content:space-between;margin-top:20px;font-weight:700;}
+  @media(max-width:760px){
+    .exam-row{flex-direction:column;align-items:flex-start;}
+    .exam-row label{width:auto;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Student Result Manager</h1>
+
+  <!-- Added under main heading -->
+  <div style="text-align:center;font-weight:700;margin-top:-4px;font-size:15px;">
+    Created by Prabhjeet Singh
+  </div>
+
+  <!-- top controls: CSV import/export, print/pdf -->
+  <div class="row">
+    <div class="col controls">
+      <button id="btnExportCSV">⬇️ Export CSV</button>
+      <button id="btnImportCSV" class="secondary">🔁 Import CSV</button>
+      <input id="fileInput" type="file" accept=".csv" class="d-none">
+    </div>
+
+    <div class="col controls" style="justify-content:flex-end;">
+      <button id="btnPrint" class="secondary">🖨 Print</button>
+      <button id="btnPDF" class="secondary">📄 PDF</button>
+    </div>
+  </div>
+
+  <!-- student select, new, load, delete -->
+  <div class="row">
+    <div class="col">
+      <label>Select Student</label>
+      <select id="studentSelect"><option value="">-- New / Select --</option></select>
+    </div>
+
+    <div class="col" style="min-width:260px;">
+      <label>&nbsp;</label>
+      <div class="controls">
+        <button id="btnNew">➕ New</button>
+        <button id="btnLoad" class="secondary">Load</button>
+        <button id="btnDelete" class="danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- student details -->
+  <div class="row">
+    <div class="col">
+      <label>Student Name</label>
+      <input id="name" type="text" placeholder="Full name">
+    </div>
+
+    <div class="col">
+      <label>Class (6–12)</label>
+      <select id="classSelect">
+        <option value="">Select</option><option>6</option><option>7</option><option>8</option>
+        <option>9</option><option>10</option><option>11</option><option>12</option>
+      </select>
+    </div>
+
+    <div class="col">
+      <label>Date of Birth</label>
+      <input id="dob" type="date">
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <label>Father's Name</label>
+      <input id="father" type="text">
+    </div>
+    <div class="col">
+      <label>Mother's Name</label>
+      <input id="mother" type="text">
+    </div>
+    <div class="col">
+      <label>Gender</label>
+      <select id="gender"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <label>School Name</label>
+      <input id="schoolInput" type="text" placeholder="Enter school name (will print large)">
+    </div>
+  </div>
+
+  <!-- subjects header & add button -->
+  <div class="flex-between" style="margin-top:12px;">
+    <h3 style="margin:0;">Subjects & Marks</h3>
+    <button id="addSubject">➕ Add Subject</button>
+  </div>
+
+  <div id="subjectsContainer" class="subjects"></div>
+
+  <!-- summary and save -->
+  <div class="summary" id="summaryBox">
+    Obtained: <span id="totalObt">0</span> |
+    Total: <span id="totalMax">0</span> |
+    Percentage: <span id="percentage">0.00</span>% |
+    Grade: <span id="grade">-</span>
+  </div>
+
+  <div class="flex-end" style="margin-top:10px;">
+    <button id="btnSave">💾 Save</button>
+    <button id="btnSaveAuto" class="secondary">Auto Save: Off</button>
+  </div>
+</div>
+
+<!-- Hidden print area -->
+<div id="printArea" class="d-none">
+  <div id="reportCard" class="report-card">
+    <div id="schoolName" class="school-title"></div>
+    <div id="studentMeta" style="margin-bottom:6px;font-weight:700;"></div>
+
+    <table id="reportTable">
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>1st Bi-M (O/T)</th>
+          <th>September (O/T)</th>
+          <th>2nd Bi-M (O/T)</th>
+          <th>Pre-Test (O/T)</th>
+          <th>Final (O/T)</th>
+          <th>Total (O/T)</th>
+        </tr>
+      </thead>
+      <tbody id="reportBody"></tbody>
+      <tfoot>
+        <tr id="examTotalsRow"><th>Exam Totals</th></tr>
+        <tr><th colspan="6">Grand Total</th><th id="grandTotalCell"></th></tr>
+        <tr><th colspan="6">Percentage</th><th id="grandPercentCell"></th></tr>
+        <tr><th colspan="6">Grade</th><th id="grandGradeCell"></th></tr>
+      </tfoot>
+    </table>
+
+    <div class="signatures">
+      <div>Class Teacher</div>
+      <div>Principal / School Head</div>
+    </div>
+
+    <!-- Added bottom-right inside PDF -->
+    <div style="text-align:right;margin-top:10px;font-weight:700;font-size:14px;">
+      Created by Dr. Manpreet Kaur
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ----------------- Data model ----------------- */
+const STORAGE_KEY = 'students_db_final_v1';
+let students = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+let selectedId = '';
+let autoSave = false;
+
+const EXAMS = [
+  {k:'m1', t:'t1', label:'1st Bi-Monthly'},
+  {k:'m2', t:'t2', label:'September Test'},
+  {k:'m3', t:'t3', label:'2nd Bi-Monthly'},
+  {k:'m4', t:'t4', label:'Pre-Test'},
+  {k:'m5', t:'t5', label:'Final Exam'}
+];
+
+/* ----------------- Helpers ----------------- */
+const $ = id => document.getElementById(id);
+function uid(){ return 'id'+Math.random().toString(36).slice(2,9); }
+function saveStorage(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(students)); populateStudentSelect(); }
+function populateStudentSelect(){
+  const sel = $('studentSelect');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">-- New / Select --</option>';
+  students.forEach(s => {
+    const o = document.createElement('option');
+    o.value = s.id; o.textContent = `${s.name} — Class ${s.class}`; sel.appendChild(o);
+  });
+  if(prev) sel.value = prev;
+}
+
+/* ----------------- Subject card UI ----------------- */
+function createSubjectCard(sub){
+  const id = sub?.id || uid();
+  const div = document.createElement('div');
+  div.className = 'subject-card';
+  div.id = id;
+
+  let title = `<div class="subject-title"><div><strong>Subject</strong> &nbsp;
+    <input class="subname" type="text" value="${sub?.name || ''}" placeholder="Subject name"></div>
+    <div><button class="danger remove-sub">Remove</button></div></div>`;
+
+  let examsHtml = EXAMS.map(e=>{
+    const mv = sub?.exams?.[e.k] ?? '';
+    const tv = sub?.exams?.[e.t] ?? '';
+    return `<div class="exam-row">
+        <label>${e.label}</label>
+        <input class="small mark" data-k="${e.k}" type="number" placeholder="Obtained" value="${mv ?? ''}">
+        <input class="small max" data-k="${e.t}" type="number" placeholder="Total" value="${tv ?? ''}">
+      </div>`;
+  }).join('');
+
+  div.innerHTML = title + examsHtml;
+
+  div.querySelector('.remove-sub').addEventListener('click', ()=>{
+    div.remove(); updateSummary(); if(autoSave) saveStudent();
+  });
+
+  div.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{ updateSummary(); if(autoSave) saveStudent(); });
+  });
+
+  return div;
+}
+
+function addSubjectToUI(sub){ $('subjectsContainer').appendChild(createSubjectCard(sub)); }
+
+/* ----------------- Read / Load Student ----------------- */
+function readFormToStudent(){
+  const name = $('name').value.trim();
+  const cls = $('classSelect').value;
+  if(!name || !cls) return null;
+
+  const st = {
+    id: selectedId || uid(),
+    name, class: cls,
+    dob: $('dob').value || '',
+    father: $('father').value.trim(), mother: $('mother').value.trim(),
+    gender: $('gender').value || '', school: $('schoolInput').value.trim(),
+    subjects: []
+  };
+
+  const cards = Array.from($('subjectsContainer').children);
+  cards.forEach(card=>{
+    const subName = card.querySelector('.subname').value.trim();
+    if(!subName) return;
+
+    const exams = {};
+    card.querySelectorAll('.mark').forEach(mEl=> exams[mEl.dataset.k] = mEl.value === '' ? null : Number(mEl.value));
+    card.querySelectorAll('.max').forEach(tEl=> exams[tEl.dataset.k] = tEl.value === '' ? null : Number(tEl.value));
+
+    st.subjects.push({ id: card.id, name: subName, exams });
+  });
+
+  return st;
+}
+
+function loadStudentToForm(id){
+  const s = students.find(x=>x.id === id);
+  if(!s) return;
+
+  selectedId = s.id;
+  $('name').value = s.name;
+  $('classSelect').value = s.class;
+  $('dob').value = s.dob || '';
+  $('father').value = s.father || '';
+  $('mother').value = s.mother || '';
+  $('gender').value = s.gender || '';
+  $('schoolInput').value = s.school || '';
+
+  $('subjectsContainer').innerHTML = '';
+  (s.subjects || []).forEach(sub => addSubjectToUI(sub));
+
+  updateSummary();
+}
+
+/* ----------------- Save / Delete ----------------- */
+function saveStudent(){
+  const s = readFormToStudent();
+  if(!s) return;
+
+  const idx = students.findIndex(x => x.id === s.id);
+  if(idx >= 0) students[idx] = s; else students.push(s);
+
+  saveStorage();
+}
+
+function deleteStudent(id){
+  students = students.filter(x => x.id !== id);
+  saveStorage();
+}
+
+/* ----------------- Summary calculation ----------------- */
+function updateSummary(){
+  let totObt = 0, totMax = 0;
+
+  Array.from($('subjectsContainer').children).forEach(card=>{
+    EXAMS.forEach(e=>{
+      const m = card.querySelector(`.mark[data-k="${e.k}"]`).value;
+      const t = card.querySelector(`.max[data-k="${e.t}"]`).value;
+      if(m && t){
+        totObt += Number(m);
+        totMax += Number(t);
+      }
+    });
+  });
+
+  $('totalObt').textContent = totObt;
+  $('totalMax').textContent = totMax;
+
+  const perc = totMax ? (totObt / totMax * 100).toFixed(2) : '0.00';
+  $('percentage').textContent = perc;
+
+  $('grade').textContent =
+    totMax ? (perc >= 90 ? 'A+' :
+              perc >= 80 ? 'A' :
+              perc >= 70 ? 'B+' :
+              perc >= 60 ? 'B' :
+              perc >= 50 ? 'C' : 'D') : '-';
+}
+
+/* ----------------- Print / PDF building ----------------- */
+function buildReport(){
+  const s = readFormToStudent();
+  if(!s) return null;
+
+  $('schoolName').textContent = s.school || 'School Name';
+
+  $('studentMeta').innerHTML =
+    `Name: ${s.name} &nbsp; | &nbsp; Class: ${s.class} <br>
+     Father: ${s.father} &nbsp; | &nbsp; Mother: ${s.mother} <br>
+     DOB: ${s.dob} &nbsp; | &nbsp; Gender: ${s.gender}`;
+
+  const body = $('reportBody');
+  body.innerHTML = '';
+
+  const examTotals = EXAMS.map(()=>({obt:0, max:0}));
+  let grandObt = 0, grandMax = 0;
+
+  (s.subjects || []).forEach(sub=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${sub.name}</td>`;
+
+    let subObt = 0, subMax = 0;
+
+    EXAMS.forEach((e, idx)=>{
+      const mv = sub.exams?.[e.k];
+      const tv = sub.exams?.[e.t];
+
+      if(mv != null && tv != null){
+        tr.innerHTML += `<td>${mv} / ${tv}</td>`;
+        subObt += mv; subMax += tv;
+        examTotals[idx].obt += mv;
+        examTotals[idx].max += tv;
+      } else {
+        tr.innerHTML += `<td>-</td>`;
+      }
+    });
+
+    tr.innerHTML += `<td>${subObt} / ${subMax}</td>`;
+    grandObt += subObt;
+    grandMax += subMax;
+
+    body.appendChild(tr);
+  });
+
+  const totalsRow = $('examTotalsRow');
+  totalsRow.innerHTML = '<th>Exam Totals</th>';
+  examTotals.forEach(et=>{
+    totalsRow.innerHTML += `<th>${et.obt} / ${et.max}</th>`;
+  });
+
+  $('grandTotalCell').textContent = `${grandObt} / ${grandMax}`;
+  $('grandPercentCell').textContent = grandMax ? ((grandObt / grandMax * 100).toFixed(2)+'%') : '0%';
+  $('grandGradeCell').textContent =
+    grandMax ? (grandObt / grandMax * 100 >= 90 ? 'A+' :
+                grandObt / grandMax * 100 >= 80 ? 'A' :
+                grandObt / grandMax * 100 >= 70 ? 'B+' :
+                grandObt / grandMax * 100 >= 60 ? 'B' :
+                grandObt / grandMax * 100 >= 50 ? 'C' : 'D') : '-';
+
+  return s;
+}
+
+/* PRINT FUNCTION */
+function printReport(){
+  const s = buildReport(); if(!s) return;
+
+  const w = window.open('', '_blank', 'width=1100,height=800');
+  w.document.write(`
+<html><head><title>${s.name}</title>
+<style>
+body{font-family:Arial;padding:20px;}
+#reportCard{width:950px;margin:auto;padding:15px;border:1px solid #d6e8ff;}
+.school-title{text-align:center;font-size:28px;font-weight:800;}
+#reportTable{width:100%;border-collapse:collapse;}
+#reportTable th,#reportTable td{border:1px solid #dbeeff;padding:8px;text-align:center;}
+.signatures{display:flex;justify-content:space-between;margin-top:20px;font-weight:700;}
+.createdByPrint{text-align:right;margin-top:10px;font-weight:700;font-size:14px;}
+</style>
+</head><body>
+${$("reportCard").outerHTML}
+</body></html>
+  `);
+  
+  w.document.close();
+  setTimeout(()=>{ w.print(); w.close(); }, 500);
+}
+
+/* PDF FUNCTION */
+async function downloadPDF(){
+  const s = buildReport(); if(!s) return;
+
+  $('printArea').style.display = 'block';
+  await new Promise(res=>setTimeout(res,200));
+
+  const canvas = await html2canvas($('reportCard'), {scale:2});
+  const imgData = canvas.toDataURL('image/png');
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({
+    orientation: 'landscape',
+    unit: 'px',
+    format: [canvas.width, canvas.height]
+  });
+
+  pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+  pdf.save(`${s.name.replace(/\s+/g,'_')}_Report.pdf`);
+
+  $('printArea').style.display = 'none';
+}
+
+/* ----------------- CSV Export / Import ----------------- */
+function exportCSV(){
+  const rows = [];
+  rows.push('id,name,class,father,mother,dob,gender,school,subject,m1,t1,m2,t2,m3,t3,m4,t4,m5,t5');
+
+  students.forEach(s=>{
+    if(s.subjects.length){
+      s.subjects.forEach(sub=>{
+        rows.push([
+          s.id,s.name,s.class,s.father,s.mother,s.dob,s.gender,s.school,sub.name,
+          sub.exams.m1??'',sub.exams.t1??'',sub.exams.m2??'',sub.exams.t2??'',
+          sub.exams.m3??'',sub.exams.t3??'',sub.exams.m4??'',sub.exams.t4??'',
+          sub.exams.m5??'',sub.exams.t5??''
+        ].join(','));
+      });
+    }
+  });
+
+  const blob = new Blob([rows.join('\n')],{type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'students_export.csv';
+  a.click();
+}
+
+function importCSVText(text){
+  const lines = text.trim().split(/\r?\n/);
+  lines.shift(); // remove header
+
+  lines.forEach(line=>{
+    const c = line.split(',');
+
+    const s = {
+      id:c[0], name:c[1], class:c[2], father:c[3], mother:c[4],
+      dob:c[5], gender:c[6], school:c[7], subjects:[]
+    };
+
+    if(c[8]){
+      s.subjects.push({
+        id:uid(),
+        name:c[8],
+        exams:{
+          m1:c[9] ? Number(c[9]) : null,
+          t1:c[10] ? Number(c[10]) : null,
+          m2:c[11] ? Number(c[11]) : null,
+          t2:c[12] ? Number(c[12]) : null,
+          m3:c[13] ? Number(c[13]) : null,
+          t3:c[14] ? Number(c[14]) : null,
+          m4:c[15] ? Number(c[15]) : null,
+          t4:c[16] ? Number(c[16]) : null,
+          m5:c[17] ? Number(c[17]) : null,
+          t5:c[18] ? Number(c[18]) : null
+        }
+      });
+    }
+
+    students.push(s);
+  });
+
+  saveStorage();
+}
+
+/* ----------------- Event wiring ----------------- */
+$('btnNew').addEventListener('click', ()=>{
+  selectedId='';
+  $('studentSelect').value='';
+  $('subjectsContainer').innerHTML='';
+  $('name').value='';
+  $('classSelect').value='';
+  $('dob').value='';
+  $('father').value='';
+  $('mother').value='';
+  $('gender').value='';
+  $('schoolInput').value='';
+  updateSummary();
+});
+
+$('btnLoad').addEventListener('click', ()=>{
+  const id = $('studentSelect').value;
+  if(id) loadStudentToForm(id);
+});
+
+$('btnDelete').addEventListener('click', ()=>{
+  const id = $('studentSelect').value;
+  if(!id) return;
+  deleteStudent(id);
+  $('studentSelect').value='';
+  $('subjectsContainer').innerHTML='';
+  updateSummary();
+});
+
+$('addSubject').addEventListener('click', ()=> addSubjectToUI({}));
+
+$('btnSave').addEventListener('click', ()=> saveStudent());
+
+$('studentSelect').addEventListener('change', ()=>{
+  const id = $('studentSelect').value;
+  if(id) loadStudentToForm(id);
+});
+
+$('btnSaveAuto').addEventListener('click', ()=>{
+  autoSave = !autoSave;
+  $('btnSaveAuto').textContent = 'Auto Save: ' + (autoSave ? 'On' : 'Off');
+});
+
+$('btnExportCSV').addEventListener('click', ()=> exportCSV());
+
+$('btnImportCSV').addEventListener('click', ()=> $('fileInput').click());
+
+$('fileInput').addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ev=> importCSVText(ev.target.result);
+  r.readAsText(f);
+});
+
+$('btnPrint').addEventListener('click', ()=> printReport());
+$('btnPDF').addEventListener('click', ()=> downloadPDF());
+
+/* autosave interval */
+setInterval(()=>{ if(autoSave) saveStudent(); }, 3000);
+
+/* init */
+populateStudentSelect();
+if($('subjectsContainer').children.length === 0) addSubjectToUI({});
+</script>
+</body>
+</html>
