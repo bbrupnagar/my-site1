@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lens Simulator Game – Convex & Concave</title>
+<style>
+  :root { --bg:#0f172a; --panel:#111827; --accent:#22c55e; --accent2:#f59e0b; --grid:#1f2937; --text:#e5e7eb; --muted:#9ca3af; }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  header{padding:14px 18px;border-bottom:1px solid #263142;background:#0b1222}
+  header h1{margin:0;font-size:18px;font-weight:700}
+  .wrap{display:grid;grid-template-columns:360px 1fr;gap:12px;padding:12px}
+  @media (max-width: 1000px){.wrap{grid-template-columns:1fr;}}
+  .panel{background:var(--panel);border:1px solid #263142;border-radius:12px; padding:14px}
+  .panel h2{margin:0 0 8px 0;font-size:16px}
+  .row{display:flex;align-items:center;gap:10px;margin:10px 0}
+  .row label{flex:0 0 130px;color:var(--muted)}
+  input[type=range]{width:100%}
+  select{width:100%}
+  .small{font-size:12px;color:var(--muted)}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .stat{background:#0b1222;border:1px solid #263142;border-radius:10px;padding:8px}
+  .stat b{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  .btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  button{background:#1f2937;color:var(--text);border:1px solid #334155;border-radius:10px;padding:10px 12px;cursor:pointer}
+  button.primary{background:var(--accent);border-color:#16a34a;color:#06220f;font-weight:700}
+  button.warn{background:#374151;border-color:#4b5563}
+  canvas{width:100%;height:auto;background:linear-gradient(180deg,#0d1426,#0e1830);border:1px solid #263142;border-radius:12px}
+  .legend{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .key{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+  .swatch{width:16px;height:3px;border-radius:2px;background:#fff}
+  .sw-orange{background:var(--accent2)}
+  .sw-green{background:var(--accent)}
+  .sw-blue{background:#60a5fa}
+  .sw-pink{background:#f472b6}
+  .sw-purple{background:#a78bfa}
+  .sw-dash{background:repeating-linear-gradient(90deg,#22c55e 0 6px, transparent 6px 12px)}
+  .status{margin-top:8px;font-size:14px}
+  .ok{color:#22c55e} .bad{color:#f97316}
+  .prop-table{margin-top:12px;border:1px solid #263142;border-radius:8px;padding:8px;background:#111827;font-size:14px}
+  .prop-table b{display:inline-block;width:100px;color:#9ca3af;}
+</style>
+</head>
+<body>
+  <header>
+    <h1>Lens Simulator Game – Convex & Concave</h1>
+  </header>
+
+  <div class="wrap">
+    <section class="panel">
+      <h2>Controls</h2>
+      <div class="row">
+        <label for="lensType">Lens type</label>
+        <select id="lensType"><option value="convex">Convex (f > 0)</option><option value="concave">Concave (f < 0)</option></select>
+      </div>
+      <div class="row">
+        <label for="focal">Focal length |f| (px)</label>
+        <input id="focal" type="range" min="40" max="160" step="1" value="100" />
+        <span id="focalVal">100</span>
+      </div>
+      <div class="row">
+        <label for="object">Object distance do (px)</label>
+        <input id="object" type="range" min="80" max="360" step="1" value="220" />
+        <span id="objectVal">220</span>
+      </div>
+      <div class="row">
+        <label for="height">Object height ho (px)</label>
+        <input id="height" type="range" min="20" max="100" step="1" value="60" />
+        <span id="heightVal">60</span>
+      </div>
+
+      <div class="btns">
+        <button class="primary" id="newTarget">New target</button>
+        <button class="warn" id="resetGame">Reset</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><b>Image distance di</b><span id="diRead">—</span></div>
+        <div class="stat"><b>Magnification m</b><span id="mRead">—</span></div>
+        <div class="stat"><b>Level</b><span id="levelRead">1 / 5</span></div>
+        <div class="stat"><b>Score</b><span id="scoreRead">0</span></div>
+      </div>
+
+      <div class="prop-table" id="imageProps">
+        <div><b>Nature:</b> —</div>
+        <div><b>Size:</b> —</div>
+        <div><b>Orientation:</b> —</div>
+        <div><b>Type:</b> —</div>
+      </div>
+
+      <p class="small">Goal: Align image candle on screen (real for convex; virtual for concave).</p>
+      <div class="status"><span id="statusText"></span></div>
+    </section>
+
+    <section class="panel">
+      <h2>Optics arena</h2>
+      <canvas id="cv" width="980" height="460" aria-label="Lens simulation canvas"></canvas>
+      <div class="legend">
+        <div class="key"><span class="swatch"></span> Principal axis and rays</div>
+        <div class="key"><span class="sw-orange"></span> Image candle</div>
+        <div class="key"><span class="sw-blue"></span> Lens</div>
+        <div class="key"><span class="sw-pink"></span> F points</div>
+        <div class="key"><span class="sw-purple"></span> 2F points</div>
+        <div class="key"><span class="sw-dash"></span> Screen target</div>
+      </div>
+    </section>
+  </div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+
+const cv = $("cv"); const ctx = cv.getContext("2d");
+const lensType = $("lensType"); const focal = $("focal"); const object = $("object"); const height = $("height");
+const focalVal = $("focalVal"); const objectVal = $("objectVal"); const heightVal = $("heightVal");
+const newTargetBtn = $("newTarget"); const resetBtn = $("resetGame");
+const diRead = $("diRead"); const mRead = $("mRead"); const levelRead = $("levelRead"); const scoreRead = $("scoreRead");
+const statusText = $("statusText"); const imageProps = $("imageProps");
+
+const W = cv.width, H = cv.height; const axisY = H/2; const lensX = W*0.38;
+
+let state = { type:'convex', f:100, do:220, ho:60, di:null, hi:null, m:null, target:240, tol:8, level:1, maxLevel:5, score:0, locked:false };
+
+const randInt = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+function newTarget(){
+  if(state.type === 'convex'){
+    state.target = randInt(130,360); state.tol = Math.max(5,10-state.level);
+  } else { // concave: virtual screen between lens and |f|
+    const absf = Math.abs(state.f);
+    state.target = -randInt(30, absf-20); state.tol = Math.max(3,6-state.level);
+  }
+  flashStatus("New screen target placed.","ok"); draw();
+}
+
+function resetGame(){
+  state = { type:'convex', f:100, do:220, ho:60, di:null, hi:null, m:null, target:240, tol:8, level:1, maxLevel:5, score:0, locked:false };
+  lensType.value = 'convex'; focal.value=100; object.value=220; height.value=60; syncInputs();
+  flashStatus("Game reset.","ok");
+}
+
+function syncInputs(){
+  state.type = lensType.value;
+  state.f = (state.type === 'convex' ? 1 : -1) * +focal.value;
+  focalVal.textContent = Math.abs(state.f);
+  state.do = +object.value; objectVal.textContent = state.do;
+  state.ho = +height.value; heightVal.textContent = state.ho;
+  computeImage(); updateHUD(); draw();
+}
+
+function computeImage(){
+  const f = state.f, do_ = state.do;
+  const denom = (1/f) - (1/do_);
+  let di = null, m = null, hi = null;
+  if(Math.abs(denom) < 1e-6){ di = Infinity; } else { di = 1 / denom; }
+  if(Number.isFinite(di)){ m = -di / do_; hi = m * state.ho; }
+  state.di = di; state.m = m; state.hi = hi;
+  updateProps();
+}
+
+function updateProps(){
+  if(!Number.isFinite(state.di)){
+    imageProps.innerHTML = `<div><b>Nature:</b> —</div><div><b>Size:</b> —</div><div><b>Orientation:</b> —</div><div><b>Type:</b> —</div>`;
+    return;
+  }
+  let nature = state.di > 0 ? "Real" : "Virtual";
+  let orientation = Math.sign(state.m) > 0 ? "Upright" : "Inverted";
+  let size = Math.abs(state.m) < 1 ? "Smaller" : Math.abs(state.m) == 1 ? "Same" : "Larger";
+  let type = state.di > 0 ? "Screen/Projection" : "Cannot project";
+  imageProps.innerHTML = `<div><b>Nature:</b> ${nature}</div>
+                          <div><b>Size:</b> ${size}</div>
+                          <div><b>Orientation:</b> ${orientation}</div>
+                          <div><b>Type:</b> ${type}</div>`;
+}
+
+function updateHUD(){
+  diRead.textContent = Number.isFinite(state.di) ? (state.di >= 0 ? "" : "-") + Math.abs(state.di).toFixed(1) + " px" : "∞ (object at f)";
+  mRead.textContent = state.m ? state.m.toFixed(2) : "—";
+  levelRead.textContent = `${state.level} / ${state.maxLevel}`;
+  scoreRead.textContent = state.score;
+  if(Number.isFinite(state.di)){
+    const err = state.di - state.target; const e = Math.abs(err);
+    if(e < state.tol){
+      statusText.innerHTML = `Aligned! Screen hit ±${state.tol}px.`; statusText.className = "ok";
+    } else {
+      const dir = err > 0 ? "Move object farther" : "Move object closer";
+      statusText.innerHTML = `Missed by ${e.toFixed(1)} px. Tip: ${dir}.`; statusText.className = "bad";
+    }
+  } else {
+    statusText.textContent = "Image at infinity. Adjust do away from |f|."; statusText.className = "bad";
+  }
+}
+
+function flashStatus(msg,kind="ok"){
+  statusText.textContent = msg; statusText.className = kind === "ok" ? "ok" : "bad";
+}
+
+function nextLevelIfHit(){
+  if(!Number.isFinite(state.di) || Math.abs(state.di - state.target) >= state.tol || state.locked) return;
+  state.locked = true; state.score += 10; updateHUD();
+  flashStatus("Level cleared! New target coming…","ok");
+  setTimeout(()=>{
+    if(state.level < state.maxLevel){ state.level++; state.locked = false; newTarget(); updateHUD(); }
+    else{ flashStatus(`Game complete! Final score: ${state.score}`,"ok"); }
+  }, 800);
+}
+
+// Draw utils
+const line = (x1,y1,x2,y2,color="#fff",width=2,dash=null)=>{
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width;
+  if(dash) ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); ctx.restore();
+};
+const circle = (x,y,r,color="#fff")=>{
+  ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.restore();
+};
+
+function drawCandle(xCenter,axisY,h,opts={}){
+  const {body="#e5e7eb",flame="#f59e0b",wick="#111827",label="",dashed=false} = opts;
+  const s = Math.sign(h) || 1; const Hbody = Math.max(14,Math.abs(h)-10); const yBase = axisY, yTop = yBase - s*Hbody;
+  ctx.save();
+  if(dashed) ctx.setLineDash([6,6]);
+  ctx.fillStyle = body; ctx.fillRect(xCenter-7,Math.min(yBase,yTop),14,Math.abs(Hbody));
+  line(xCenter,yTop,xCenter,yTop-s*5,wick,2);
+  ctx.fillStyle = flame; ctx.beginPath(); ctx.ellipse(xCenter,yTop-s*11,4,7,0,0,Math.PI*2); ctx.fill();
+  if(label){
+    ctx.fillStyle = "#9ca3af"; ctx.font = "12px system-ui"; ctx.fillText(label,xCenter-24,yTop-s*18);
+  }
+  ctx.restore();
+}
+
+function drawLens(convex=true){
+  const top=40,bottom=H-40,width=30;
+  ctx.save(); ctx.fillStyle = "#60a5fa"; ctx.beginPath();
+  if(convex){
+    ctx.moveTo(lensX-top/10,top); ctx.bezierCurveTo(lensX+width/2,top,lensX+width/2,axisY, lensX+width/2,bottom);
+    ctx.bezierCurveTo(lensX+width/2,bottom,lensX-top/10,bottom, lensX-top/10,top);
+  } else { // concave shape
+    ctx.moveTo(lensX+top/10,top); ctx.bezierCurveTo(lensX-width/2,top,lensX-width/2,axisY, lensX-width/2,bottom);
+    ctx.bezierCurveTo(lensX-width/2,bottom,lensX+top/10,bottom, lensX+top/10,top);
+  }
+  ctx.fill(); ctx.restore();
+}
+
+function drawFocusAnd2F(f){
+  const absf = Math.abs(f);
+  const FxL = lensX - absf, FxR = lensX + absf;
+  circle(FxL,axisY,4,"#f472b6"); circle(FxR,axisY,4,"#f472b6");
+  ctx.save(); ctx.fillStyle="#f472b6"; ctx.font="12px system-ui";
+  ctx.fillText("F",FxL-10,axisY-8); ctx.fillText("F",FxR+6,axisY-8); ctx.restore();
+  const F2L = lensX - 2*absf, F2R = lensX + 2*absf;
+  circle(F2L,axisY,4,"#a78bfa"); circle(F2R,axisY,4,"#a78bfa");
+  ctx.save(); ctx.fillStyle="#a78bfa"; ctx.font="12px system-ui";
+  ctx.fillText("2F",F2L-16,axisY-8); ctx.fillText("2F",F2R+6,axisY-8); ctx.restore();
+}
+
+function drawRays(do_, ho, f){
+  const xObj = lensX - do_; const yTop = axisY - ho; const di = state.di; const hi = state.hi;
+  line(20,axisY,W-20,axisY,"#94a3b8",1.5);
+  if(!Number.isFinite(di)) return;
+  const xImg = lensX + di; const yImg = axisY - hi; const absf = Math.abs(f);
+  // Ray 1: Parallel to axis
+  line(xObj, yTop, lensX, yTop, "#e5e7eb",2);
+  if(state.type === 'convex'){
+    line(lensX, yTop, lensX + absf, axisY, "#e5e7eb",2); // through far F
+    line(lensX + absf, axisY, xImg, yImg, "#e5e7eb",2);
+  } else {
+    line(lensX, yTop, xImg, yImg, "#e5e7eb",2); // toward near F (virtual ext)
+    line(xImg, yImg, lensX - absf, axisY, "#e5e7eb", 2, [4,4]); // dashed backward
+  }
+  // Ray 2: Through near F
+  line(xObj, yTop, lensX - absf, axisY, "#e5e7eb",2);
+  if(state.type === 'convex'){
+    line(lensX - absf, axisY, lensX, axisY, "#e5e7eb",2); // to parallel
+    line(lensX, axisY, xImg, yImg, "#e5e7eb",2);
+  } else {
+    line(lensX, axisY, xImg, yImg, "#e5e7eb",2); // emerges parallel (virtual)
+  }
+  // Ray 3: Through center (undeviated)
+  line(xObj, yTop, xImg, yImg, "#f59e0b",2);
+}
+
+function drawTarget(){
+  const x = lensX + state.target;
+  line(x,40,x,H-40,"#22c55e",2,[10,8]);
+  circle(x,axisY,5,"#22c55e"); circle(x,axisY,2,"#052e1a");
+}
+
+function drawObject(do_,ho){
+  drawCandle(lensX-do_, axisY, ho, {body:"#e5e7eb",flame:"#f59e0b",wick:"#111827",label:"Object"});
+}
+
+function drawImage(di,hi){
+  if(!Number.isFinite(di)) return;
+  const xImg = lensX + di;
+  drawCandle(xImg, axisY, hi, {body:"#f59e0b", flame:"#fbbf24", wick:"#111827", label:"Image", dashed:di < 0});
+}
+
+function drawGrid(){
+  for(let x=20;x<W;x+=20) line(x,20,x,H-20,"#1f2937",1);
+  for(let y=20;y<H;y+=20) line(20,y,W-20,y,"#1f2937",1);
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  drawGrid();
+  drawLens(state.type === 'convex');
+  drawFocusAnd2F(state.f);
+  drawTarget();
+  drawObject(state.do, state.ho);
+  drawRays(state.do, state.ho, state.f);
+  drawImage(state.di, state.hi);
+}
+
+// Events
+[lensType, focal, object, height].forEach(inp => inp.addEventListener("input", syncInputs));
+[lensType, focal, object, height].forEach(inp => inp.addEventListener("change", () => { nextLevelIfHit(); }));
+newTargetBtn.addEventListener("click", newTarget);
+resetBtn.addEventListener("click", resetGame);
+
+// Init
+syncInputs();
+newTarget();
+draw();
+})();
+</script>
+</body>
+</html>
