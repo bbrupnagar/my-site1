@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Chemical Reaction Simulator — Final Black Theme</title>
+
+<style>
+body{
+  margin:0;
+  background:#000000;      /* BLACK BACKGROUND */
+  color:#ffffff;           /* White text */
+  padding:18px;
+  font-family: Inter, Arial, sans-serif;
+}
+
+.app{
+  max-width:1100px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns: 1fr 420px;
+  gap:18px;
+}
+
+/* Panels */
+.panel{
+  background:#1a1a1a;        /* Dark Grey Panel */
+  border-radius:12px;
+  padding:14px;
+  border:2px solid #d8b74d;
+  box-shadow:0 4px 14px rgba(0,0,0,0.6);
+}
+
+/* Colour Boxes */
+.color-box {
+  display:inline-block;
+  width:14px;
+  height:14px;
+  border:1px solid #aaa;
+  margin-right:6px;
+  vertical-align:middle;
+  border-radius:3px;
+}
+
+h1{ margin:0 0 8px 0; font-size:19px; font-weight:700; }
+
+select, button{
+  padding:9px 10px;
+  border-radius:8px;
+  border:2px solid #b99306;
+  background:#ffd84d;
+  cursor:pointer;
+  font-weight:600;
+  color:#000;
+}
+
+/* Reaction Stage */
+.stage{
+  min-height:480px;
+  background:#111111;     /* Dark Stage */
+  border-radius:12px;
+  border:2px solid #e5c665;
+  padding:12px;
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  position:relative;
+}
+
+/* Beakers */
+.vessel{
+  width:120px;
+  height:190px;
+  background:#f6f6f6;     /* LIGHT = liquids visible */
+  border-radius:10px;
+  border:2px solid #b99306;
+  position:relative;
+}
+.lip{
+  height:10px;
+  background:#ddd;
+  border-bottom:2px solid #b99306;
+  border-radius:8px 8px 0 0;
+}
+.liquid{
+  position:absolute;
+  left:8px; right:8px; bottom:8px;
+  height:80px;
+  border-radius:6px;
+  box-shadow:inset 0 -8px 14px rgba(0,0,0,0.15);
+  transition:height .22s linear;
+}
+.label{
+  position:absolute;
+  width:100%;
+  bottom:6px;
+  font-size:12px;
+  text-align:center;
+  color:#000000;   /* Black text inside light beaker */
+}
+
+/* Reaction Tank */
+.rxn{
+  width:420px;
+  height:360px;
+  background:#1a1a1a;
+  border:2px solid #e5c665;
+  border-radius:12px;
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  position:relative;
+}
+.rxn-tank{
+  width:240px;
+  height:240px;
+  background:#ffffff;        /* WHITE = precipitate clear */
+  border:2px solid #b99306;
+  border-radius:12px;
+  position:relative;
+}
+
+/* Product liquid */
+.inner-liquid{
+  position:absolute;
+  left:12px; right:12px; bottom:12px;
+  height:0;
+  background:#e7fbff;
+  border-radius:8px;
+  box-shadow:inset 0 -12px 40px rgba(0,0,0,0.25);
+  transition:height .22s linear;
+}
+
+/* Precipitate */
+.precip{
+  position:absolute;
+  left:12px; right:12px; bottom:12px;
+  height:0;
+  border-bottom-left-radius:10px;
+  border-bottom-right-radius:10px;
+  transition:height .32s linear, background .32s linear;
+}
+
+/* Gas plume */
+.plume{
+  position:absolute;
+  left:50%; top:8%;
+  transform:translateX(-50%);
+  width:240px; height:140px;
+  opacity:0;
+  filter:blur(8px);
+  pointer-events:none;
+  transition:opacity .4s;
+}
+.plume.show{ opacity:1; }
+
+/* Bubbles */
+.bubbles{
+  position:absolute;
+  left:0; right:0; top:12px; bottom:12px;
+  pointer-events:none;
+}
+.bubble{
+  position:absolute;
+  border-radius:50%;
+  background:#ffffff;
+  opacity:.96;
+  animation:rise var(--d,1.8s) linear infinite;
+}
+@keyframes rise{
+  0%{ transform:translateY(0) scale(.9); opacity:.95 }
+  100%{ transform:translateY(-240px) scale(.4); opacity:0 }
+}
+
+/* Flash */
+.flash{
+  position:absolute; inset:0;
+  background:radial-gradient(circle,#ffffff,transparent 60%);
+  opacity:0;
+  transition:opacity .05s;
+  pointer-events:none;
+}
+
+/* Slider */
+.controls{ display:flex; gap:8px; margin-top:12px; }
+.range-wrap{ flex:1; }
+
+input[type=range]{
+  width:100%;
+  height:10px;
+  background:#444;
+  border-radius:8px;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:18px; height:18px;
+  background:#ffd84d;
+  border-radius:50%;
+}
+
+/* Observations */
+.eq{ font-weight:700; font-size:15px; }
+.obs{
+  background:#333;
+  border:2px dashed #d8b74d;
+  padding:10px;
+  border-radius:8px;
+  color:#fff;
+}
+
+.copy{
+  padding:8px 10px;
+  background:#333;
+  border:2px solid #d8b74d;
+  border-radius:8px;
+  cursor:pointer;
+  color:#ffd84d;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- LEFT PANEL -->
+  <div class="panel">
+    <h1>Reaction Simulator</h1>
+    <h3 style="margin:4px 0 12px 0; color:#ffd84d;">Created By: Mr. Prabhjeet Singh</h3>
+
+    <div style="display:flex; gap:8px; margin-bottom:10px;">
+      <select id="reactionSelect">
+        <option value="Mg+O2">Magnesium + Oxygen</option>
+        <option value="Fe+CuSO4">Iron + Copper Sulphate</option>
+        <option value="CuSO4+NaOH">Copper Sulphate + NaOH</option>
+        <option value="FeSO4_decomp">Ferrous Sulphate Heating</option>
+        <option value="PbNO3_heat">Lead Nitrate Heating</option>
+        <option value="Zn+HCl">Zinc + Hydrochloric Acid</option>
+        <option value="CaO+H2O">Calcium Oxide + Water</option>
+        <option value="AgNO3+NaCl">Silver Nitrate + NaCl</option>
+        <option value="NaHCO3+CH3COOH">Baking Soda + Vinegar</option>
+        <option value="C+O2">Carbon + Oxygen</option>
+      </select>
+
+      <button id="startBtn">Start</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+
+    <div class="stage">
+
+      <div class="vessel">
+        <div class="lip"></div>
+        <div id="liquidA" class="liquid"></div>
+        <div id="labelA" class="label"></div>
+      </div>
+
+      <div class="rxn">
+        <div class="rxn-tank">
+          <div id="innerLiquid" class="inner-liquid"></div>
+          <div id="precip" class="precip"></div>
+          <div id="bubbles" class="bubbles"></div>
+          <div id="plume" class="plume"></div>
+          <div id="flash" class="flash"></div>
+        </div>
+      </div>
+
+      <div class="vessel">
+        <div class="lip"></div>
+        <div id="liquidB" class="liquid"></div>
+        <div id="labelB" class="label"></div>
+      </div>
+
+    </div>
+
+    <div class="controls">
+      <div class="range-wrap">
+        <input id="mixSlider" type="range" min="0" max="100" value="0">
+      </div>
+      <div class="small">Auto</div>
+    </div>
+
+    <div style="margin-top:8px;">
+      <label><input type="checkbox" id="sunToggle"> Sunlight (AgCl)</label>
+      &nbsp;&nbsp;&nbsp;
+      <label><input type="checkbox" id="showLabels" checked> Show Labels</label>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="panel right-col">
+    <div id="eqText" class="eq">—</div>
+    <strong>Type:</strong> <span id="typeText">—</span>
+
+    <div style="margin-top:10px;"><strong>Colours:</strong>
+      <ul id="colourList"></ul>
+    </div>
+
+    <strong>Observations:</strong>
+    <div id="obsText" class="obs"></div>
+
+    <div style="margin-top:8px; display:flex; justify-content:space-between;">
+      <button id="copyEq" class="copy">Copy</button>
+      <div id="copyMsg" style="display:none; color:#00ff00;">Copied!</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* Attractive colours */
+const C={
+  blue:"#0047b3",
+  brown:"#8a4f00",
+  yellow:"#f1c40f",
+  purple:"#7a3dc2",
+  white:"#ffffff",
+  gas:"#cccccc",
+  black:"#000000"
+};
+
+const reactions={
+  "Mg+O2":{
+    type:"Combination Reaction",
+    eq:"2Mg + O₂ → 2MgO",
+    A:{name:"Magnesium", color:"#b5b5b5", colorName:"Silvery grey"},
+    B:{name:"Oxygen gas", color:"#e7f6ff", colorName:"Very light blue"},
+    precip:{show:true, color:C.white, name:"Magnesium oxide", colorName:"White"},
+    flash:true,
+    obs:["Magnesium burns with bright white light.","White ash MgO forms."]
+  },
+
+  "Fe+CuSO4":{
+    type:"Displacement Reaction",
+    eq:"Fe + CuSO₄ → FeSO₄ + Cu",
+    A:{name:"Iron", color:"#575757", colorName:"Grey"},
+    B:{name:"Copper sulphate", color:C.blue, colorName:"Blue"},
+    precip:{show:true, color:C.brown, name:"Copper metal", colorName:"Reddish brown"},
+    obs:["Blue CuSO₄ turns green.","Brown copper deposits."]
+  },
+
+  "CuSO4+NaOH":{
+    type:"Double Displacement",
+    eq:"CuSO₄ + 2NaOH → Na₂SO₄ + Cu(OH)₂",
+    A:{name:"Copper sulphate", color:C.blue, colorName:"Blue"},
+    B:{name:"Sodium hydroxide", color:"#d8f0ff", colorName:"Light blue"},
+    precip:{show:true, color:C.blue, name:"Copper hydroxide", colorName:"Blue ppt"},
+    obs:["Blue precipitate Cu(OH)₂ forms."]
+  },
+
+  "FeSO4_decomp":{
+    type:"Thermal Decomposition",
+    eq:"2FeSO₄ → Fe₂O₃ + SO₂ + SO₃",
+    A:{name:"Ferrous sulphate", color:"#83c99d", colorName:"Light green"},
+    B:{name:"—", color:C.white, colorName:"White"},
+    precip:{show:true, color:C.brown, name:"Ferric oxide", colorName:"Brown"},
+    gas:{label:"SO₂ / SO₃", color:C.gas, colorName:"Pungent colourless gases"},
+    obs:["Light green FeSO₄ turns brown.","Pungent gases released."]
+  },
+
+  "PbNO3_heat":{
+    type:"Thermal Decomposition",
+    eq:"Pb(NO₃)₂ → PbO + NO₂ + O₂",
+    A:{name:"Lead nitrate", color:C.white, colorName:"White"},
+    B:{name:"—", color:C.white, colorName:"White"},
+    precip:{show:true, color:C.yellow, name:"Lead oxide", colorName:"Yellow"},
+    gas:{label:"NO₂", color:"#a03c00", colorName:"Brown gas"},
+    obs:["Brown NO₂ gas evolves.","Yellow PbO forms."]
+  },
+
+  "Zn+HCl":{
+    type:"Displacement Reaction",
+    eq:"Zn + 2HCl → ZnCl₂ + H₂",
+    A:{name:"Zinc metal", color:"#8a8a8a", colorName:"Grey"},
+    B:{name:"Hydrochloric acid", color:"#f9ffff", colorName:"Colourless"},
+    gas:{label:"Hydrogen gas", color:C.gas, colorName:"Colourless"},
+    bubbles:true,
+    obs:["Effervescence due to hydrogen.","Zinc dissolves slowly."]
+  },
+
+  "CaO+H2O":{
+    type:"Combination Reaction",
+    eq:"CaO + H₂O → Ca(OH)₂",
+    A:{name:"Calcium oxide", color:C.white, colorName:"White"},
+    B:{name:"Water", color:"#d8f0ff", colorName:"Light blue"},
+    milky:true,
+    obs:["Reaction becomes hot.","Milky white Ca(OH)₂ forms."]
+  },
+
+  "AgNO3+NaCl":{
+    type:"Precipitation Reaction",
+    eq:"AgNO₃ + NaCl → AgCl ↓ + NaNO₃",
+    A:{name:"Silver nitrate", color:"#f6fcff", colorName:"Colourless"},
+    B:{name:"Sodium chloride", color:"#f7faff", colorName:"Colourless"},
+    precip:{show:true, color:C.white, name:"Silver chloride", colorName:"White (turns purple in sunlight)", sunlight:true},
+    obs:["White AgCl precipitate.","Turns purple in sunlight."]
+  },
+
+  "NaHCO3+CH3COOH":{
+    type:"Acid–Base Reaction",
+    eq:"NaHCO₃ + CH₃COOH → CO₂ + H₂O + CH₃COONa",
+    A:{name:"Baking soda", color:C.white, colorName:"White"},
+    B:{name:"Vinegar", color:"#fff4f4", colorName:"Very light pink"},
+    gas:{label:"Carbon dioxide", color:C.gas, colorName:"Colourless"},
+    bubbles:true,
+    obs:["Brisk effervescence.","Cooling effect."]
+  },
+
+  "C+O2":{
+    type:"Combination Reaction",
+    eq:"C + O₂ → CO₂",
+    A:{name:"Carbon", color:C.black, colorName:"Black"},
+    B:{name:"Oxygen gas", color:"#f3fbff", colorName:"Very light blue"},
+    gas:{label:"Carbon dioxide", color:C.gas, colorName:"Colourless"},
+    obs:["Carbon burns to form CO₂."]
+  }
+};
+
+/* DOM elements */
+const sel=document.getElementById("reactionSelect");
+const start=document.getElementById("startBtn");
+const reset=document.getElementById("resetBtn");
+const slider=document.getElementById("mixSlider");
+const LA=document.getElementById("liquidA");
+const LB=document.getElementById("liquidB");
+const IL=document.getElementById("innerLiquid");
+const PP=document.getElementById("precip");
+const PL=document.getElementById("plume");
+const BB=document.getElementById("bubbles");
+const FL=document.getElementById("flash");
+const eqT=document.getElementById("eqText");
+const typeT=document.getElementById("typeText");
+const colList=document.getElementById("colourList");
+const obsT=document.getElementById("obsText");
+const labA=document.getElementById("labelA");
+const labB=document.getElementById("labelB");
+const sun=document.getElementById("sunToggle");
+const showL=document.getElementById("showLabels");
+
+/* Load reaction */
+function load(key){
+  const r=reactions[key];
+
+  LA.style.background=r.A.color;
+  LB.style.background=r.B.color;
+  labA.textContent=r.A.name;
+  labB.textContent=r.B.name;
+
+  eqT.textContent=r.eq;
+  typeT.textContent=r.type;
+
+  let html = `
+    <li><span class="color-box" style="background:${r.A.color};"></span>
+    <strong>Reactant A:</strong> ${r.A.name} <em>(${r.A.colorName})</em></li>
+
+    <li><span class="color-box" style="background:${r.B.color};"></span>
+    <strong>Reactant B:</strong> ${r.B.name} <em>(${r.B.colorName})</em></li>
+  `;
+
+  if(r.precip?.show){
+    html += `
+      <li><span class="color-box" style="background:${r.precip.color};"></span>
+      <strong>Precipitate:</strong> ${r.precip.name} <em>(${r.precip.colorName})</em></li>
+    `;
+  }
+
+  if(r.milky){
+    html += `
+      <li><span class="color-box" style="background:white;"></span>
+      <strong>Product:</strong> Calcium hydroxide <em>(Milky white)</em></li>
+    `;
+  }
+
+  if(r.gas){
+    html += `
+      <li><span class="color-box" style="background:${r.gas.color};"></span>
+      <strong>Gas:</strong> ${r.gas.label} <em>(${r.gas.colorName})</em></li>
+    `;
+  }
+
+  colList.innerHTML = html;
+  obsT.innerHTML = r.obs.join("<br>");
+
+  slider.value=0;
+  clearVisuals();
+}
+
+/* Clear visuals */
+function clearVisuals(){
+  IL.style.height="0px";
+  PP.style.height="0px";
+  PP.style.background="transparent";
+  BB.innerHTML="";
+  PL.innerHTML="";
+  PL.classList.remove("show");
+  FL.style.opacity=0;
+}
+
+/* Update visuals */
+function update(p){
+  const r=reactions[sel.value];
+  const f=p/100;
+
+  LA.style.height=(80-80*f)+"px";
+  LB.style.height=(80-80*f)+"px";
+  IL.style.height=(200*f)+"px";
+
+  if(r.precip?.show){
+    if(f>0.3){
+      const h=(f-0.3)*150/0.7;
+      PP.style.height=h+"px";
+
+      let col=r.precip.color;
+      if(r.precip.sunlight && sun.checked && f>0.6) col=C.purple;
+      PP.style.background=col;
+    } else PP.height="0px";
+  }
+
+  if(r.bubbles && f>0.1){
+    BB.innerHTML="";
+    for(let i=0;i<10;i++){
+      const b=document.createElement("div");
+      b.className="bubble";
+      b.style.left=(30+Math.random()*150)+"px";
+      b.style.width=b.style.height=(8+Math.random()*16)+"px";
+      b.style.setProperty("--d",(1+Math.random()*1.5)+"s");
+      BB.appendChild(b);
+    }
+  }
+
+  if(r.gas && f>0.1){
+    PL.innerHTML="";
+    for(let i=0;i<10;i++){
+      const d=document.createElement("div");
+      d.style.position="absolute";
+      d.style.width=d.style.height=(10+Math.random()*18)+"px";
+      d.style.left=(20+Math.random()*180)+"px";
+      d.style.top=(20+Math.random()*80)+"px";
+      d.style.background=r.gas.color;
+      PL.appendChild(d);
+    }
+    PL.classList.add("show");
+  }
+
+  if(r.flash && f>0.6){
+    FL.style.opacity=1;
+    setTimeout(()=>FL.style.opacity=0,100);
+  }
+}
+
+/* Auto-run */
+let running=false;
+let timer=null;
+
+function run(){
+  if(running)return;
+  running=true;
+  start.disabled=true;
+  sel.disabled=true;
+  slider.disabled=true;
+
+  let p=0;
+  timer=setInterval(()=>{
+    p++;
+    slider.value=p;
+    update(p);
+
+    if(p>=100){
+      clearInterval(timer);
+      running=false;
+      setTimeout(()=>{
+        start.disabled=false;
+        sel.disabled=false;
+        slider.disabled=false;
+      },300);
+    }
+  },30);
+}
+
+/* Events */
+sel.onchange=()=>load(sel.value);
+start.onclick=run;
+reset.onclick=()=>{ clearInterval(timer); running=false; load(sel.value); };
+slider.oninput=()=>{ if(!running) update(+slider.value); };
+showL.onchange=()=>{ labA.style.display=showL.checked?"block":"none"; labB.style.display=showL.checked?"block":"none"; };
+
+load(sel.value);
+</script>
+
+</body>
+</html>
