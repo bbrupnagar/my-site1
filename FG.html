@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Functional Groups Identification</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;
+    }
+    .container {
+      width: 100%; max-width: 550px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+      overflow: hidden; text-align: center;
+    }
+    .header { background: linear-gradient(90deg, #ff7e5f, #feb47b); padding: 20px; color: white; }
+    h1 { font-size: 26px; margin-bottom: 8px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+    .creator { font-style: italic; font-size: 15px; }
+    .game-screen, .start-screen, .game-over { padding: 25px; }
+    .btn {
+      background: linear-gradient(90deg, #6a11cb, #2575fc); color: white; border: none;
+      padding: 12px 28px; font-size: 18px; border-radius: 50px; cursor: pointer;
+      margin: 20px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: all 0.3s ease;
+    }
+    .btn:hover { transform: translateY(-3px); }
+    .btn:active { transform: translateY(1px); }
+    .compound-display {
+      background: #fff; padding: 20px; border-radius: 15px; margin: 20px 0;
+      font-size: 22px; font-weight: bold; min-height: 80px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 15px 0; }
+    .option-btn {
+      background: #f1f1f1; border: 2px solid #ddd; padding: 12px;
+      border-radius: 10px; cursor: pointer; font-size: 15px; transition: all 0.2s ease;
+    }
+    .option-btn:hover { background: #e0e0e0; transform: scale(1.03); }
+    .correct { background: #4caf50 !important; color: white; }
+    .incorrect { background: #f44336 !important; color: white; }
+    .score-board { display: flex; justify-content: space-between; margin: 10px 0; font-size: 16px; font-weight: bold; }
+    .timer { font-size: 20px; color: #e91e63; margin: 8px 0; }
+    .over h2 { font-size: 28px; margin-bottom: 15px; color: #e91e63; }
+    .final-score { font-size: 24px; margin: 15px 0; color: #333; }
+    .hidden { display: none; }
+    @media (max-width: 500px) {
+      .options { grid-template-columns: 1fr; }
+      h1 { font-size: 22px; }
+      .compound-display { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Functional Groups Identification</h1>
+      <div class="creator">created by Mr. Prabhjeet Singh</div>
+    </div>
+
+    <div id="start-screen" class="start-screen">
+      <p>Identify the functional group in each compound!</p>
+      <p>You have 60 seconds to answer correctly.</p>
+      <button id="start-btn" class="btn">Start</button>
+    </div>
+
+    <div id="game-screen" class="game-screen hidden">
+      <div class="score-board">
+        <div>Score: <span id="score">0</span></div>
+        <div>Level: <span id="level">1</span></div>
+      </div>
+      <div class="timer">Time left: <span id="time">60</span>s</div>
+      <div class="compound-display"><span id="compound"></span></div>
+      <div class="options" id="options"></div>
+      <div id="feedback"></div>
+    </div>
+
+    <div id="game-over" class="game-over hidden">
+      <h2>Game Over!</h2>
+      <div class="final-score">Your score: <span id="final-score">0</span></div>
+      <button id="restart-btn" class="btn">Play Again</button>
+    </div>
+  </div>
+
+  <!-- ✅ SCRIPT at the bottom -->
+  <script>
+    let score = 0, timeLeft = 60, currentLevel = 1, timer, currentCompound = {};
+
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const gameOverScreen = document.getElementById('game-over');
+    const startBtn = document.getElementById('start-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const scoreDisplay = document.getElementById('score');
+    const levelDisplay = document.getElementById('level');
+    const timeDisplay = document.getElementById('time');
+    const compoundDisplay = document.getElementById('compound');
+    const finalScoreDisplay = document.getElementById('final-score');
+    const feedbackDisplay = document.getElementById('feedback');
+    const optionsDiv = document.getElementById('options');
+
+    const compounds = [
+      { formula: "CH<sub>3</sub>CH<sub>2</sub>OH", name: "Ethanol", group: "alcohol" },
+      { formula: "CH<sub>3</sub>COOH", name: "Acetic Acid", group: "carboxylic" },
+      { formula: "CH<sub>3</sub>CHO", name: "Acetaldehyde", group: "aldehyde" },
+      { formula: "CH<sub>3</sub>COCH<sub>3</sub>", name: "Acetone", group: "ketone" },
+      { formula: "HCOOH", name: "Formic Acid", group: "carboxylic" },
+      { formula: "CH<sub>3</sub>CH<sub>2</sub>NH<sub>2</sub>", name: "Ethylamine", group: "amine" },
+      { formula: "CH<sub>3</sub>COOCH<sub>3</sub>", name: "Methyl Acetate", group: "ester" },
+      { formula: "C<sub>2</sub>H<sub>5</sub>OC<sub>2</sub>H<sub>5</sub>", name: "Diethyl Ether", group: "ether" },
+      { formula: "CH<sub>3</sub>CONH<sub>2</sub>", name: "Acetamide", group: "amide" },
+      { formula: "C<sub>6</sub>H<sub>5</sub>NO<sub>2</sub>", name: "Nitrobenzene", group: "nitro" },
+      { formula: "CH<sub>3</sub>CH<sub>2</sub>Cl", name: "Chloroethane", group: "halide" }
+    ];
+
+    const groupNames = {
+      'alcohol': 'Alcohol',
+      'aldehyde': 'Aldehyde',
+      'ketone': 'Ketone',
+      'carboxylic': 'Carboxylic Acid',
+      'amine': 'Amine',
+      'ester': 'Ester',
+      'ether': 'Ether',
+      'amide': 'Amide',
+      'nitro': 'Nitro Compound',
+      'halide': 'Alkyl Halide'
+    };
+
+    startBtn.addEventListener('click', start);
+    restartBtn.addEventListener('click', start);
+
+    function start() {
+      score = 0; timeLeft = 60; currentLevel = 1;
+      scoreDisplay.textContent = score;
+      levelDisplay.textContent = currentLevel;
+      timeDisplay.textContent = timeLeft;
+      startScreen.classList.add('hidden');
+      gameOverScreen.classList.add('hidden');
+      gameScreen.classList.remove('hidden');
+      clearInterval(timer);
+      timer = setInterval(updateTimer, 1000);
+      loadNewCompound();
+    }
+
+    function updateTimer() {
+      timeLeft--; timeDisplay.textContent = timeLeft;
+      if (timeLeft <= 0) endGame();
+    }
+
+    function loadNewCompound() {
+      const randomIndex = Math.floor(Math.random() * compounds.length);
+      currentCompound = compounds[randomIndex];
+      compoundDisplay.innerHTML = currentCompound.formula;
+      feedbackDisplay.textContent = "";
+      optionsDiv.innerHTML = "";
+      let groups = Object.keys(groupNames);
+      let correct = currentCompound.group;
+      let choices = [correct];
+      while (choices.length < 4) {
+        let rand = groups[Math.floor(Math.random() * groups.length)];
+        if (!choices.includes(rand)) choices.push(rand);
+      }
+      choices.sort(() => Math.random() - 0.5);
+      choices.forEach(g => {
+        const btn = document.createElement("button");
+        btn.classList.add("option-btn");
+        btn.textContent = groupNames[g];
+        btn.onclick = () => checkAnswer(g, btn);
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selectedGroup, btn) {
+      const correctGroup = currentCompound.group;
+      if (selectedGroup === correctGroup) {
+        score += 10;
+        feedbackDisplay.innerHTML = `✅ Correct! ${currentCompound.formula} is ${currentCompound.name} (${groupNames[correctGroup]})`;
+        feedbackDisplay.style.color = "#4caf50";
+        btn.classList.add("correct");
+        if (score >= currentLevel * 50) {
+          currentLevel++; levelDisplay.textContent = currentLevel;
+          timeLeft += 15; timeDisplay.textContent = timeLeft;
+        }
+      } else {
+        feedbackDisplay.innerHTML = `❌ Incorrect! ${currentCompound.formula} is ${currentCompound.name} (${groupNames[correctGroup]})`;
+        feedbackDisplay.style.color = "#f44336";
+        btn.classList.add("incorrect");
+        timeLeft = Math.max(0, timeLeft - 5);
+      }
+      scoreDisplay.textContent = score;
+      setTimeout(loadNewCompound, 2000);
+    }
+
+    function endGame() {
+      clearInterval(timer);
+      finalScoreDisplay.textContent = score;
+      gameScreen.classList.add('hidden');
+      gameOverScreen.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
